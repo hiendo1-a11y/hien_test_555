@@ -28,16 +28,16 @@ INDEX_HTML   = Path("index.html")
 HISTORY_FILE = Path(".article_history.json")  # lưu tiêu đề đã dùng
 
 TOPICS = [
-    "Công nghệ & Trí tuệ nhân tạo",
-    "Sức khoẻ & Lối sống",
-    "Kinh doanh & Khởi nghiệp",
-    "Giáo dục & Học tập",
-    "Du lịch & Khám phá",
-    "Tâm lý & Phát triển bản thân",
-    "Môi trường & Thiên nhiên",
-    "Văn hoá & Xã hội",
-    "Tài chính cá nhân",
-    "Khoa học & Khám phá",
+    "Technology & Artificial Intelligence",
+    "Health & Lifestyle",
+    "Business & Entrepreneurship",
+    "Education & Learning",
+    "Travel & Exploration",
+    "Psychology & Self-Development",
+    "Environment & Nature",
+    "Culture & Society",
+    "Personal Finance",
+    "Science & Discovery",
 ]
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -69,30 +69,30 @@ def generate_article(used_titles: list[str]) -> dict:
     """Trả về dict: {title, topic, summary, sections}"""
     used_str = "\n".join(f"- {t}" for t in used_titles[-30:]) if used_titles else "(chưa có)"
 
-    prompt = f"""Bạn là nhà báo chuyên viết bài tiếng Việt hay và sâu sắc.
+prompt = f"""You are a professional journalist who writes insightful articles in English.
 
-Danh sách tiêu đề đã dùng (KHÔNG được lặp lại chủ đề hoặc tiêu đề tương tự):
+List of titles already used (DO NOT repeat or use similar titles/topics):
 {used_str}
 
-Hãy tạo một bài viết HOÀN TOÀN MỚI thuộc một trong các chủ đề: {', '.join(TOPICS)}
+Create a COMPLETELY NEW article on one of these topics: {', '.join(TOPICS)}
 
-Trả về JSON hợp lệ (không có markdown fence) với cấu trúc:
+Return valid JSON (no markdown fences) with this structure:
 {{
-  "title": "Tiêu đề bài viết",
-  "topic": "Chủ đề",
-  "summary": "Tóm tắt 1-2 câu",
+  "title": "Article title",
+  "topic": "Topic",
+  "summary": "1-2 sentence summary",
   "sections": [
-    {{"heading": "Tên mục", "paragraphs": ["đoạn 1", "đoạn 2"]}},
+    {{"heading": "Section name", "paragraphs": ["paragraph 1", "paragraph 2"]}},
     ...
   ]
 }}
 
-Yêu cầu:
-- Tiêu đề hấp dẫn, độc đáo
-- 3-4 mục, mỗi mục 1-2 đoạn (~60-80 từ/đoạn)
-- Tổng bài viết khoảng 1000 từ (không nhiều hơn)
-- Văn phong chuyên nghiệp, thông tin hữu ích
-- Chỉ trả về JSON, không thêm gì khác
+Requirements:
+- Catchy, unique title
+- 3-4 sections, each with 1-2 paragraphs (~60-80 words/paragraph)
+- Total article around 1000 words
+- Professional tone, useful information
+- Return ONLY valid JSON, nothing else
 """
 
     url = (
