@@ -22,7 +22,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 # ── Cấu hình ────────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL = "gemini-1.5-flash"   # thay vì gemini-2.0-flash
+GEMINI_MODEL   = "gemini-2.0-flash"   # hoặc gemini-1.5-pro
 PDF_DIR      = Path(".")              # PDF lưu thẳng ở thư mục gốc (giống repo thực tế)
 INDEX_HTML   = Path("index.html")
 HISTORY_FILE = Path(".article_history.json")  # lưu tiêu đề đã dùng
@@ -89,7 +89,8 @@ Trả về JSON hợp lệ (không có markdown fence) với cấu trúc:
 
 Yêu cầu:
 - Tiêu đề hấp dẫn, độc đáo
-- 4-5 mục, mỗi mục 2-3 đoạn (~80-120 từ/đoạn)
+- 3-4 mục, mỗi mục 1-2 đoạn (~60-80 từ/đoạn)
+- Tổng bài viết khoảng 1000 từ (không nhiều hơn)
 - Văn phong chuyên nghiệp, thông tin hữu ích
 - Chỉ trả về JSON, không thêm gì khác
 """
@@ -98,19 +99,30 @@ Yêu cầu:
         f"https://generativelanguage.googleapis.com/v1beta/models/"
         f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
     )
-    resp = requests.post(
-        url,
-        headers={"Content-Type": "application/json"},
-        json={
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0.9,
-                "maxOutputTokens": 2000,
+    import time
+    for attempt in range(5):
+        resp = requests.post(
+            url,
+            headers={"Content-Type": "application/json"},
+            json={
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.9,
+                    "maxOutputTokens": 1500,
+                },
             },
-        },
-        timeout=60,
-    )
-    resp.raise_for_status()
+            timeout=60,
+        )
+        if resp.status_code == 429:
+            wait = 30 * (attempt + 1)  # 30s, 60s, 90s, 120s, 150s
+            print(f"⚠️ Rate limit (429), chờ {wait}s rồi thử lại... (lần {attempt+1}/5)")
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        break
+    else:
+        raise Exception("❌ Gemini API vẫn trả 429 sau 5 lần thử. Hãy kiểm tra quota tại: https://aistudio.google.com")
+
     raw = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
     # strip possible markdown fences
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
