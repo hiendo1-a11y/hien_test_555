@@ -21,7 +21,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 
 # ── Config ────────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL = "gemini-2.5-flash-preview-05-20"
+GEMINI_MODEL = "gemini-2.5-flash"
 PDF_DIR = Path(".")
 INDEX_HTML = Path("index.html")
 HISTORY_FILE = Path(".article_history.json")
