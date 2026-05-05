@@ -117,6 +117,8 @@ Yêu cầu:
             wait = 10 * (attempt + 1)  # 10s, 20s, 30s
             print(f"⚠️ Rate limit (429), chờ {wait}s... (lần {attempt+1}/3)")
             time.sleep(wait)
+            print(f"📡 Status: {resp.status_code}")
+            print(f"📡 Response: {resp.text[:500]}")
             continue
         resp.raise_for_status()
         break
