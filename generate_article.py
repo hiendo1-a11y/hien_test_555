@@ -119,9 +119,27 @@ Requirements:
     raw = parts[-1]["text"].strip()
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
     raw = re.sub(r"\n?```$", "", raw)
-    if not raw.endswith("}"):
-        raw = raw.rsplit("}", 1)[0] + "}]}"
-    return json.loads(raw)
+    # Fix common JSON issues from LLM output
+    raw = raw.replace("\n", " ")
+    raw = re.sub(r",\s*}", "}", raw)
+    raw = re.sub(r",\s*]", "]", raw)
+    # Find the outermost JSON object
+    start = raw.index("{")
+    depth = 0
+    for i, ch in enumerate(raw[start:], start):
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                raw = raw[start:i+1]
+                break
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        print(f"JSON error: {e}")
+        print(f"Raw output (first 500 chars): {raw[:500]}")
+        raise
 
 # ── Create PDF ───────────────────────────────────────────────────────────
 
