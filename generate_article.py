@@ -108,7 +108,7 @@ Yêu cầu:
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {
                     "temperature": 0.9,
-                    "maxOutputTokens": 4000,
+                    "maxOutputTokens": 8000,
                 },
             },
             timeout=60,
@@ -125,10 +125,16 @@ Yêu cầu:
     else:
         raise Exception("❌ Gemini API trả 429 liên tục. Chờ vài phút rồi chạy lại, hoặc tạo API key mới tại: https://aistudio.google.com/app/apikey")
 
-    raw = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+    parts = resp.json()["candidates"][0]["content"]["parts"]
+    # Gemini 2.5 có thể trả nhiều parts (thinking + text), lấy part cuối cùng
+    raw = parts[-1]["text"].strip()
     # strip possible markdown fences
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
     raw = re.sub(r"\n?```$", "", raw)
+    # Nếu JSON vẫn bị cắt, thử sửa
+    if not raw.endswith("}"):
+        # Cố gắng đóng JSON
+        raw = raw.rsplit("}", 1)[0] + "}]}"
     return json.loads(raw)
 
 # ── Tạo PDF ───────────────────────────────────────────────────────────────────
