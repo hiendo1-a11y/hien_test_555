@@ -108,7 +108,7 @@ Yêu cầu:
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {
                     "temperature": 0.9,
-                    "maxOutputTokens": 1500,
+                    "maxOutputTokens": 4000,
                 },
             },
             timeout=60,
