@@ -22,7 +22,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 # ── Cấu hình ────────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL   = "gemini-2.0-flash"   # hoặc gemini-1.5-pro
+GEMINI_MODEL = "gemini-1.5-flash"
 PDF_DIR      = Path(".")              # PDF lưu thẳng ở thư mục gốc (giống repo thực tế)
 INDEX_HTML   = Path("index.html")
 HISTORY_FILE = Path(".article_history.json")  # lưu tiêu đề đã dùng
