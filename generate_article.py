@@ -22,7 +22,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 # ── Cấu hình ────────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL   = "gemini-2.0-flash"   # hoặc gemini-1.5-pro
 PDF_DIR      = Path(".")              # PDF lưu thẳng ở thư mục gốc (giống repo thực tế)
 INDEX_HTML   = Path("index.html")
 HISTORY_FILE = Path(".article_history.json")  # lưu tiêu đề đã dùng
@@ -100,7 +100,7 @@ Yêu cầu:
         f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
     )
     import time
-    for attempt in range(5):
+    for attempt in range(3):
         resp = requests.post(
             url,
             headers={"Content-Type": "application/json"},
@@ -114,14 +114,14 @@ Yêu cầu:
             timeout=60,
         )
         if resp.status_code == 429:
-            wait = 30 * (attempt + 1)  # 30s, 60s, 90s, 120s, 150s
-            print(f"⚠️ Rate limit (429), chờ {wait}s rồi thử lại... (lần {attempt+1}/5)")
+            wait = 10 * (attempt + 1)  # 10s, 20s, 30s
+            print(f"⚠️ Rate limit (429), chờ {wait}s... (lần {attempt+1}/3)")
             time.sleep(wait)
             continue
         resp.raise_for_status()
         break
     else:
-        raise Exception("❌ Gemini API vẫn trả 429 sau 5 lần thử. Hãy kiểm tra quota tại: https://aistudio.google.com")
+        raise Exception("❌ Gemini API trả 429 liên tục. Chờ vài phút rồi chạy lại, hoặc tạo API key mới tại: https://aistudio.google.com/app/apikey")
 
     raw = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
     # strip possible markdown fences
