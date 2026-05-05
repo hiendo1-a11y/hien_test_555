@@ -1,0 +1,53 @@
+name: 🤖 Auto Generate Article & PDF
+
+on:
+  # Chạy tự động mỗi ngày lúc 8:00 sáng (giờ UTC+7 = 01:00 UTC)
+  schedule:
+    - cron: "0 1 * * *"
+
+  # Cho phép chạy thủ công từ tab Actions
+  workflow_dispatch:
+
+permissions:
+  contents: write   # cần để commit & push
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout toàn bộ repo (kèm lịch sử để tránh conflict)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Cài Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Cài thư viện cần thiết
+      - name: Install dependencies
+        run: |
+          pip install reportlab requests
+
+      # 4. Chạy script tạo bài viết + PDF + cập nhật index.html
+      - name: Generate article and PDF
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        id: generate
+        run: python generate_article.py
+
+      # 5. Commit và push kết quả về repo
+      - name: Commit and push changes
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add articles/ index.html .article_history.json
+          git diff --cached --quiet && echo "Không có thay đổi" && exit 0
+
+          git commit -m "🤖 Auto: ${{ steps.generate.outputs.article_title }}"
+          git push
