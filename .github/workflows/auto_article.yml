@@ -46,7 +46,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add articles/ index.html .article_history.json
+          git add *.pdf index.html .article_history.json
           git diff --cached --quiet && echo "Không có thay đổi" && exit 0
 
           git commit -m "🤖 Auto: ${{ steps.generate.outputs.article_title }}"
